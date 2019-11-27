@@ -51,8 +51,9 @@ gcloud pubsub topics create digi_appointments_topic --message-storage-policy-all
 gcloud pubsub subscriptions create digi_appointments_bq_sub --topic=digi_appointments_topic --topic-project=digital-health-uk-poc --ack-deadline=10 
 ```
 #### Create BigQuery Schema
-A schema is created to store the data. 
-- digital_health.appointment (dataset.table) to store the ingested data  
+A schema (dataset:digital_health) is created to store the data. 
+- a table appointment to store the ingested data  
+
 |Field name	|Type	|Mode|
 |-----------|-----|----|
 |Type|	STRING|	NULLABLE|	
@@ -64,8 +65,22 @@ AppointmentId	|STRING	|NULLABLE|
 bq mk -t digital_health.appointment ./code/digital_health_schema.json
 ```
 
-### Dataflow Pipeline
+- a dead letter table (digital_health.appointment_error_records) for error records is automatically created by Dataflow job 
 
+|Field name	|Type	|Mode|
+|-----------|-----|----|
+|timestamp	|TIMESTAMP|	REQUIRED	|
+|payloadString	|STRING|	REQUIRED	|
+|payloadBytes|	BYTES|	REQUIRED	|
+|attributes	|RECORD	|REPEATED	|
+|attributes. key	|STRING|	NULLABLE	|
+|attributes. value	|STRING|	NULLABLE	|
+|errorMessage	|STRING	|NULLABLE	|
+|stacktrace	|STRING|	NULLABLE	|
+
+### Dataflow Pipeline
+- A streaming pipeline using PubSub_Subscription_to_BigQuery template is created using gcloud CLI. 
+- A transform UDF javascript function is used to flatten "Data" object in the json message.
 ```
 gcloud dataflow jobs run digital-appt-job-6 \
 --gcs-location gs://dataflow-templates/latest/PubSub_Subscription_to_BigQuery \
