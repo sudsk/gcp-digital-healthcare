@@ -98,26 +98,35 @@ gcloud dataflow jobs run digital-appt-job-1 \
 --parameters inputSubscription=projects/digital-health-uk-poc/subscriptions/digital_subs,outputTableSpec=digital-health-uk-poc:digital.appointment,javascriptTextTransformGcsPath=gs://digital_health_uk_poc/flattenData.js,javascriptTextTransformFunctionName=transform
 ```
 ## Analytics
-- a schema (dataset:analytics) is created to store the analytics views
-```
-bq mk --location=europe-west2 analytics
-```
 - A view of the current state of an appointment must be shown (Is it currently booked / cancelled or completed) 
 ```
-bq mk \
---use_legacy_sql=false \
---view \
-'SELECT AppointmentId, Type as CurrentStatus
+SELECT AppointmentId, Type as CurrentStatus
 FROM (
 SELECT AppointmentId, Type,
        ROW_NUMBER() OVER (PARTITION BY AppointmentId ORDER BY TimestampUtc DESC) AS rnum
-FROM digital-health-uk-poc.digital_health.appointment`)
-WHERE rnum = 1' \
-analytics.appointments_current_view
+FROM `digital-health-uk-poc.digital_health.appointment`)
+WHERE rnum = 1
 ```
 - Average duration of appointments should easily be calculable (also by discipline if the information is available).
 ```
+SELECT AVG(delta_in_seconds) as Avg_duration_of_appointments
+FROM (
+SELECT AppointmentId, Type, 
+       TIMESTAMP_DIFF(completed_time, booked_time, SECOND) AS delta_in_seconds
+FROM (       
+SELECT AppointmentId, Type,  
+       LAST_VALUE(TimestampUtc) OVER (PARTITION BY AppointmentId ORDER BY TimestampUtc ASC
+       ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS completed_time,
+       FIRST_VALUE(TimestampUtc) OVER (PARTITION BY AppointmentId ORDER BY TimestampUtc ASC
+       ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS booked_time
+FROM `macro-mender-236621.digital_health.appointment` 
+WHERE Type IN ('AppointmentBooked','AppointmentComplete'))
+WHERE Type = 'AppointmentComplete')
 ```
+
+|Row	|Avg_duration_of_appointments|	
+|-----|----------------------------|
+|1|	420.0|
 
 ## Schema Changes
 
