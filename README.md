@@ -141,7 +141,24 @@ WHERE Type = 'AppointmentComplete')
 |1|	420.0|
 
 ## Schema Changes
+- Schema changes can be handled by not flattening "Data" object in Dataflow UDF, but keeping two columns only in BigQuery Appointment table - Type and Data.
+- This means future schema changes doesn't affect the ingestion pipeline, but only the SQL view queries has to be modified.
 
 ## Reconciliation		
-
+- how you verify that the end result is correct
 ## Error scenarios	
+- what happens if you get a broken event like { "Type": "AppointmentBooked", "Data": { , and how would you handle it?
+- The error records are written to a dead letter table such as below:
+
+|Row|	timestamp|	payloadString|	payloadBytes|	attributes.key|	attributes.value|	errorMessage|	stacktrace|
+|---|----------|---------------|--------------|---------------|-----------------|-------------|-----------|
+|1	|2019-11-27 17:11:17.844 UTC|
+{ "Type": "AppointmentBooked", "Data": {|
+eyAiVHlwZSI6ICJBcHBvaW50bWVudEJvb2tlZCIsICJEYXRhIjogew==|||
+SyntaxError: Invalid JSON: <json>:1:40 Expected , or } but found eof
+{ "Type": "AppointmentBooked", "Data": {
+                                        ^ in <eval> at line number 2
+javax.script.ScriptException: SyntaxError: Invalid JSON: <json>:1:40 Expected , or } but found eof
+{ "Type": "AppointmentBooked", "Data": {
+                                        ^ in <eval> at line number 2
+	at jdk.nashorn.api.scripting.NashornScriptEngine.throwAsScriptException(NashornScriptEngine.java:470).....|
