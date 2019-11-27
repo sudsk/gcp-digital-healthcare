@@ -46,10 +46,18 @@ To keep things simple, we will use Dataflow template here. The template can be c
 #### Create PubSub Subscription
 #### Create BigQuery Schema
 ```
+bq mk -t digital.appointment ./code/digital_health_schema.json
 ```
 
 ### Dataflow Pipeline
 
+```
+gcloud dataflow jobs run digital-appt-job-6 \
+--gcs-location gs://dataflow-templates/latest/PubSub_Subscription_to_BigQuery \
+--region=europe-west1 \
+--staging-location=gs://digital_health_uk_poc/stage \
+--parameters inputSubscription=projects/digital-health-uk-poc/subscriptions/digital_subs,outputTableSpec=digital-health-uk-poc:digital.appointment,javascriptTextTransformGcsPath=gs://digital_health_uk_poc/flattenData.js,javascriptTextTransformFunctionName=transform
+```
 ## Analytics
 
 ## Schema Changes
