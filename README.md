@@ -13,7 +13,7 @@
 - [Error scenarios](#error-scenarios)	
 
 ## Introduction
-Digital healthcare raises hundreds of types of events from microservice based architecture. In order to support real time operations as well as requirements for business intelligence, these events must support multiple use cases, but also be able to evolve over time as the microservices themselves to.
+Digital healthcare raises hundreds of types of events from microservice based architecture such as from their Mobile Apps. In order to support real time operations as well as requirements for business intelligence, these events must support multiple use cases, but also be able to evolve over time as the microservices themselves to.
 
 The task here is to allow for the ingestion of these events and produce data that is query-able for a number of different views of this data:
 - The raw events must be stored in a query-able format
