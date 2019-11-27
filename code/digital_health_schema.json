@@ -1,19 +1,29 @@
 [
- {
-   "name": "Type",
-   "type": "string"
- },
- {
-   "name": "AppointmentId",
-   "type": "string"
- },
- {
-   "name": "TimestampUtc",
-   "type": "timestamp"
- },
- {
-   "name": "Discipline",
-   "type": "string",
-   "mode": "repeated"
- }
+    {
+        "name": "Type",
+        "type": "STRING",
+        "mode": "REQUIRED"
+    },
+    {
+        "name": "Data",
+        "type": "RECORD",
+        "mode": "REQUIRED",
+        "fields": [
+            {
+                "name": "AppointmentId",
+                "type": "STRING",
+                "mode": "REQUIRED"
+            },
+            {
+                "name": "TimestampUtc",
+                "type": "TIMESTAMP",
+                "mode": "REQUIRED"
+            },
+            {
+                "name": "Discipline",
+                "type": "STRING",
+                "mode": "REPEATED"
+            }
+        ]
+    }
 ]
