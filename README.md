@@ -51,7 +51,10 @@ gcloud pubsub topics create digi_appointments_topic --message-storage-policy-all
 gcloud pubsub subscriptions create digi_appointments_bq_sub --topic=digi_appointments_topic --topic-project=digital-health-uk-poc --ack-deadline=10 
 ```
 #### Create BigQuery Schema
-A schema (dataset:digital_health) is created to store the ingested data:
+- a schema (dataset:digital_health) is created to store the ingested data
+```
+bq mk --location=europe-west2 digital_health
+```
 - a table appointment to store the ingested data  
 
 |Field name	|Type	|Mode|
@@ -78,17 +81,43 @@ bq mk -t digital_health.appointment ./code/digital_health_schema.json
 |errorMessage	|STRING	|NULLABLE	|
 |stacktrace	|STRING|	NULLABLE	|
 
+#### Create a storage bucket
+```
+export BUCKET_NAME=digital_health_uk_poc
+gsutil mb -c standard -l europe-west2 gs://$BUCKET_NAME/
+```
+
 ### Dataflow Pipeline
 - A streaming pipeline using PubSub_Subscription_to_BigQuery template is created using gcloud CLI. 
 - A transform UDF javascript function is used to flatten "Data" object in the json message.
 ```
-gcloud dataflow jobs run digital-appt-job-6 \
+gcloud dataflow jobs run digital-appt-job-1 \
 --gcs-location gs://dataflow-templates/latest/PubSub_Subscription_to_BigQuery \
 --region=europe-west1 \
 --staging-location=gs://digital_health_uk_poc/stage \
 --parameters inputSubscription=projects/digital-health-uk-poc/subscriptions/digital_subs,outputTableSpec=digital-health-uk-poc:digital.appointment,javascriptTextTransformGcsPath=gs://digital_health_uk_poc/flattenData.js,javascriptTextTransformFunctionName=transform
 ```
 ## Analytics
+- a schema (dataset:analytics) is created to store the analytics views
+```
+bq mk --location=europe-west2 analytics
+```
+- A view of the current state of an appointment must be shown (Is it currently booked / cancelled or completed) 
+```
+bq mk \
+--use_legacy_sql=false \
+--view \
+'SELECT AppointmentId, Type as CurrentStatus
+FROM (
+SELECT AppointmentId, Type,
+       ROW_NUMBER() OVER (PARTITION BY AppointmentId ORDER BY TimestampUtc DESC) AS rnum
+FROM digital-health-uk-poc.digital_health.appointment`)
+WHERE rnum = 1' \
+analytics.appointments_current_view
+```
+- Average duration of appointments should easily be calculable (also by discipline if the information is available).
+```
+```
 
 ## Schema Changes
 
