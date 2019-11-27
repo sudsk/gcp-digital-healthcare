@@ -68,7 +68,7 @@ AppointmentId	|STRING	|NULLABLE|
 bq mk -t digital_health.appointment ./code/digital_health_schema.json
 ```
 
-- a dead letter table (digital_health.appointment_error_records) for error records is automatically created by Dataflow job 
+- a dead letter table (digital_health.appointment_error_records) for error records is automatically created by Dataflow job, if not created manually before 
 
 |Field name	|Type	|Mode|
 |-----------|-----|----|
@@ -148,8 +148,13 @@ WHERE Type = 'AppointmentComplete')
 - how you verify that the end result is correct
 ## Error scenarios	
 - what happens if you get a broken event like { "Type": "AppointmentBooked", "Data": { , and how would you handle it?
-- The error records are written to a dead letter table such as below:
+- Messages can fail to reach the output table for all kind of reasons (e.g., mismatched schema, malformed json). These messages are written to the dead letter table (digital_health.appointment_error_records).
+- A sample error record in the dead letter table as below:
 
 |Row|	timestamp|	payloadString|	payloadBytes|	attributes.key|	attributes.value|	errorMessage|	stacktrace|
 |---|----------|---------------|--------------|---------------|-----------------|-------------|-----------|
 |1|2019-11-27 17:11:17.844 UTC|{ "Type": "AppointmentBooked", "Data": {|eyAiVHlwZSI6ICJBcHBvaW50bWVudEJvb2tlZCIsICJEYXRhIjogew==|||SyntaxError: Invalid JSON: <json>:1:40 Expected , or } but found eof...|javax.script.ScriptException: SyntaxError: Invalid JSON: <json>:1:40 Expected , or } but found eof|
+  
+- This dead letter table can be analysed for failure type, frequency of errors and possible remediations.
+- It is possible to write this information to Cloud Storage or another PubSub Topic as well by customising the Dataflow template.
+
