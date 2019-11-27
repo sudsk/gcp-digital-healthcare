@@ -1,0 +1,14 @@
+{ "Type": "AppointmentBooked", "Data": { "AppointmentId": "3cb0f939-9398-4d29-a28f-2a1a3a6ce3b2", "TimestampUtc": "2017-05-14T19:12:32Z" } }
+{ "Type": "AppointmentComplete", "Data": { "AppointmentId": "3cb0f939-9398-4d29-a28f-2a1a3a6ce3b2", "TimestampUtc": "2017-05-14T19:18:32Z"} }
+{ "Type": "AppointmentBooked", "Data": { "AppointmentId": "a7d86ca5-7541-4c86-a7ad-1bec2b070b3c", "TimestampUtc": "2017-05-14T19:20:33Z" } }
+{ "Type": "AppointmentComplete", "Data": {"AppointmentId": "a7d86ca5-7541-4c86-a7ad-1bec2b070b3c", "TimestampUtc": "2017-05-14T19:22:33Z"} }
+{ "Type": "AppointmentBooked", "Data": { "AppointmentId": "757001d9-a454-40d3-a14b-9f0f9440be9f", "TimestampUtc": "2017-05-14T20:12:34Z" } }
+{ "Type": "AppointmentComplete", "Data": { "AppointmentId": "757001d9-a454-40d3-a14b-9f0f9440be9f", "TimestampUtc": "2017-05-14T20:32:34Z"} }
+{ "Type": "AppointmentBooked", "Data": { "AppointmentId": "4f3fd16c-4685-45e6-a6f9-823f5f73a7d0", "TimestampUtc": "2017-05-14T20:42:35Z" } }
+{ "Type": "AppointmentComplete", "Data": {"AppointmentId": "4f3fd16c-4685-45e6-a6f9-823f5f73a7d0", "TimestampUtc": "2017-05-14T20:43:35Z"} }
+{ "Type": "AppointmentBooked", "Data": { "AppointmentId": "812a8469-68d0-4c9b-8429-d46d51d63db3", "TimestampUtc": "2017-05-14T21:12:36Z" } }
+{ "Type": "AppointmentBooked", "Data": { "AppointmentId": "8825cd95-f172-4132-9793-864b4dd725df", "TimestampUtc": "2017-05-14T21:12:37Z" } }
+{ "Type": "AppointmentComplete", "Data": { "AppointmentId": "812a8469-68d0-4c9b-8429-d46d51d63db3", "TimestampUtc": "2017-05-14T21:18:36Z"} }
+{ "Type": "AppointmentCancelled", "Data": {"AppointmentId": "8825cd95-f172-4132-9793-864b4dd725df", "TimestampUtc": "2017-05-14T21:19:37Z"} }
+{ "Type": "AppointmentBooked", "Data": { "AppointmentId": "8825cdff-f172-4132-9793-864b4dd725df", "TimestampUtc": "2017-05-14T22:12:37Z" } }
+{ "Type": "AppointmentBooked", "Data": { "AppointmentId": "8825cdff-f172-4132-9793-864b4dd72444", "TimestampUtc": "2017-05-14T22:12:37Z", "Discipline": ["Physio"] } }
