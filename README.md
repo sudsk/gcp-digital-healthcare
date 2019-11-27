@@ -1,17 +1,18 @@
 # GCP data ingestion architecture for a Digital Healthcare company
 
 ## Table of contents
-- Overview
-- High Level Design		
-- Data Ingestion Pipeline			
-  - Overview
-  - Dataflow Pipeline
-  - BigQuery schemas
-- Schema Changes
-- Reconciliation		
-- Error scenarios	
+- [Introduction](#introduction)
+- [High Level Design](#high-level-design)
+- [Data Ingestion Pipeline](#data-ingestion-pipeline)			
+  - [Overview](#overview)
+  - [Setup](#setup)
+  - [Dataflow Pipeline](#dataflow-pipeline)
+- [Analytics](#analytics)
+- [Schema Changes](#schema-changes)
+- [Reconciliation](#reconciliation)		
+- [Error scenarios](#error-scenarios)	
 
-## Overview 
+## Introduction
 Digital healthcare raises hundreds of types of events from microservice based architecture. In order to support real time operations as well as requirements for business intelligence, these events must support multiple use cases, but also be able to evolve over time as the microservices themselves to.
 
 The task here is to allow for the ingestion of these events and produce data that is query-able for a number of different views of this data:
@@ -26,3 +27,19 @@ The solution should be able to:
 
 ## High Level Design
 ![HLD](images/digitalhealth.png)
+
+## Data Ingestion Pipeline		
+  
+### Overview
+
+### Setup
+
+### Dataflow Pipeline
+
+## Analytics
+
+## Schema Changes
+
+## Reconciliation		
+
+## Error scenarios	
