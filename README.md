@@ -165,20 +165,21 @@ GROUP BY Discipline
 NA - indicates when discipline information is Not Available.
 
 ## Schema Changes
+Adapt to changes in schema:
 - Schema changes can be handled by not flattening "Data" object in Dataflow UDF, but keeping two columns only in BigQuery Appointment table - Type and Data.
 - This means future schema changes doesn't affect the ingestion pipeline, but only the SQL view queries has to be modified.
 
 ## Reconciliation		
-- how you verify that the end result is correct?
+How you verify that the end result is correct?
 - Reconciling a streaming data pipeline is a challenge in itself. One possibility is to check cumulative rolling counts. 
-- Primarily by monitoring Stackdriver metrics for Topic and Subscription. Some of the important ones are:
+- Primarily by monitoring Stackdriver metrics for Topic and Subscription. Some of the important metrics are:
   - subscription/num_undelivered_messages - cumulative rolling count
   - topic/published requests - cumulative rolling count
 - Check BigQuery for messages loaded in a rolling period as well as monitor dead letter table for failures.
-- Monitoring above will ensure that all messages added to PubSub topic are ingested by Dataflow and either successfully loaded or ends up in dead letter. 
+- Monitoring above will ensure that all messages added to PubSub topic are ingested by Dataflow and either successfully loaded into table or ends up in dead letter table. 
 
 ## Error handling	
-- what happens if you get a broken event like { "Type": "AppointmentBooked", "Data": { , and how would you handle it?
+What happens if you get a broken event like { "Type": "AppointmentBooked", "Data": { , and how would you handle it?
 - Messages can fail to reach the output table for all kind of reasons (e.g., mismatched schema, malformed json). These messages are written to the dead letter table (digital_health.appointment_error_records).
 - A sample error record in the dead letter table as below:
 
