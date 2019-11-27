@@ -166,8 +166,8 @@ NA - indicates when discipline information is Not Available.
 
 ## Schema Changes
 Adapt to changes in schema:
-- Dataflow ingestion pipeline needs no change when the message schema changes, assuming changes only happen to the fields under Data object.
-- BigQuery Schema can be easily changed to add new columns under Data record and is natively supported.
+- Dataflow ingestion pipeline needs no change when the message schema changes, assuming changes only happen to the fields under **Data object**.
+- BigQuery Schema can be easily changed to add new columns under **Data record** and is natively supported.
 - Relaxing a column's mode from REQUIRED to NULLABLE is also natively supported.
 - Some of the BigQuery operations can automatically add new columns such as - when you use a load or query job to overwrite a table, or
 when you append data to a table using a load or query job. But this is not supported for streaming inserts. So the new columns has to be manually added beforehand. 
