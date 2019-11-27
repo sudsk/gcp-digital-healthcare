@@ -152,13 +152,4 @@ WHERE Type = 'AppointmentComplete')
 
 |Row|	timestamp|	payloadString|	payloadBytes|	attributes.key|	attributes.value|	errorMessage|	stacktrace|
 |---|----------|---------------|--------------|---------------|-----------------|-------------|-----------|
-|1	|2019-11-27 17:11:17.844 UTC|
-{ "Type": "AppointmentBooked", "Data": {|
-eyAiVHlwZSI6ICJBcHBvaW50bWVudEJvb2tlZCIsICJEYXRhIjogew==|||
-SyntaxError: Invalid JSON: <json>:1:40 Expected , or } but found eof
-{ "Type": "AppointmentBooked", "Data": {
-                                        ^ in <eval> at line number 2
-javax.script.ScriptException: SyntaxError: Invalid JSON: <json>:1:40 Expected , or } but found eof
-{ "Type": "AppointmentBooked", "Data": {
-                                        ^ in <eval> at line number 2
-	at jdk.nashorn.api.scripting.NashornScriptEngine.throwAsScriptException(NashornScriptEngine.java:470).....|
+|1|2019-11-27 17:11:17.844 UTC|{ "Type": "AppointmentBooked", "Data": {|eyAiVHlwZSI6ICJBcHBvaW50bWVudEJvb2tlZCIsICJEYXRhIjogew==|||SyntaxError: Invalid JSON: <json>:1:40 Expected , or } but found eof...|javax.script.ScriptException: SyntaxError: Invalid JSON: <json>:1:40 Expected , or } but found eof|
