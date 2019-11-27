@@ -107,6 +107,18 @@ SELECT AppointmentId, Type,
 FROM `digital-health-uk-poc.digital_health.appointment`)
 WHERE rnum = 1
 ```
+|Row	|AppointmentId|	CurrentStatus|	
+|-----|-------------|--------------|
+|1|	3cb0f939-9398-4d29-a28f-2a1a3a6ce3b2|AppointmentComplete|
+|2|	4f3fd16c-4685-45e6-a6f9-823f5f73a7d0|AppointmentComplete|
+|3|	757001d9-a454-40d3-a14b-9f0f9440be9f|AppointmentComplete|
+|4|	812a8469-68d0-4c9b-8429-d46d51d63db3|AppointmentComplete|
+|5|	8825cd95-f172-4132-9793-864b4dd725df|AppointmentCancelled|
+|6|	8825cdff-f172-4132-9793-864b4dd72444|AppointmentBooked|
+|7|	8825cdff-f172-4132-9793-864b4dd725df|AppointmentBooked|
+|8|	a7d86ca5-7541-4c86-a7ad-1bec2b070b3c|AppointmentComplete|
+
+
 - Average duration of appointments should easily be calculable (also by discipline if the information is available).
 ```
 SELECT AVG(delta_in_seconds) as Avg_duration_of_appointments
@@ -119,7 +131,7 @@ SELECT AppointmentId, Type,
        ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS completed_time,
        FIRST_VALUE(TimestampUtc) OVER (PARTITION BY AppointmentId ORDER BY TimestampUtc ASC
        ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS booked_time
-FROM `macro-mender-236621.digital_health.appointment` 
+FROM `digital-health-uk-poc.digital_health.appointment` 
 WHERE Type IN ('AppointmentBooked','AppointmentComplete'))
 WHERE Type = 'AppointmentComplete')
 ```
