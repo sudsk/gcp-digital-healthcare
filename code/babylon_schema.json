@@ -1,0 +1,19 @@
+[
+ {
+   "name": "Type",
+   "type": "string"
+ },
+ {
+   "name": "AppointmentId",
+   "type": "string"
+ },
+ {
+   "name": "TimestampUtc",
+   "type": "timestamp"
+ },
+ {
+   "name": "Discipline",
+   "type": "string",
+   "mode": "repeated"
+ }
+]
