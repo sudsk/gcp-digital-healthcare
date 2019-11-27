@@ -43,10 +43,25 @@ To keep things simple, we will use Dataflow template here. The template can be c
 ### Setup
 
 #### Create PubSub Topic
-#### Create PubSub Subscription
-#### Create BigQuery Schema
 ```
-bq mk -t digital.appointment ./code/digital_health_schema.json
+gcloud pubsub topics create digi_appointments_topic --message-storage-policy-allowed-regions=europe-west2
+```
+#### Create PubSub Subscription
+```
+gcloud pubsub subscriptions create digi_appointments_bq_sub --topic=digi_appointments_topic --topic-project=digital-health-uk-poc --ack-deadline=10 
+```
+#### Create BigQuery Schema
+A schema is created to store the data. 
+- digital_health.appointment (dataset.table) to store the ingested data  
+|Field name	|Type	|Mode|
+|-----------|-----|----|
+|Type|	STRING|	NULLABLE|	
+AppointmentId	|STRING	|NULLABLE|	
+|TimestampUtc|	TIMESTAMP|	NULLABLE|	
+|Discipline|	STRING|	REPEATED|	
+
+```
+bq mk -t digital_health.appointment ./code/digital_health_schema.json
 ```
 
 ### Dataflow Pipeline
