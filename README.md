@@ -174,7 +174,9 @@ How you verify that the end result is correct?
 - Reconciling a streaming data pipeline is a challenge in itself. One possibility is to check cumulative rolling counts. 
 - Primarily by monitoring Stackdriver metrics for Topic and Subscription. Some of the important metrics are:
   - subscription/num_undelivered_messages - cumulative rolling count
+  - subscription/oldest_unacked_message_age 
   - topic/published requests - cumulative rolling count
+- Create alerts that will fire when the metrics values are unusually large in the context of the application.  
 - Check BigQuery for messages loaded in a rolling period as well as monitor dead letter table for failures.
 - Monitoring above will ensure that all messages added to PubSub topic are ingested by Dataflow and either successfully loaded into table or ends up in dead letter table. 
 
