@@ -1,4 +1,4 @@
-# GCP reference architecture for a Digital Healthcare company
+# GCP data ingestion architecture for a Digital Healthcare company
 
 ## Table of contents
 - Overview
