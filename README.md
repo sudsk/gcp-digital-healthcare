@@ -25,4 +25,4 @@ The solution should be able to:
 - Handle broken events
 
 ## High Level Design
-[HLD](images/digitalhealth.png)
+![HLD](images/digitalhealth.png)
