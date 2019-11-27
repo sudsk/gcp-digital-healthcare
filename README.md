@@ -59,13 +59,14 @@ bq mk --location=europe-west2 digital_health
 
 |Field name	|Type	|Mode|
 |-----------|-----|----|
-|Type|	STRING|	NULLABLE|	
-AppointmentId	|STRING	|NULLABLE|	
-|TimestampUtc|	TIMESTAMP|	NULLABLE|	
-|Discipline|	STRING|	REPEATED|	
+|Type|	STRING|	REQUIRED|	
+|Data|	RECORD|	REQUIRED|	
+|Data.AppointmentId	|STRING	|REQUIRED|	
+|Data.TimestampUtc|	TIMESTAMP|REQUIRED|	
+|Data.Discipline|	STRING|	REPEATED|	
 
 ```
-bq mk -t digital_health.appointment ./code/digital_health_schema.json
+bq mk -t digital_health.appointment ./code/[digital_health_schema.json](https://raw.githubusercontent.com/sudsk/gcp-digital-healthcare/master/code/digital_health_schema.json)
 ```
 
 - a dead letter table (digital_health.appointment_error_records) for error records is automatically created by Dataflow job, if not created manually before 
@@ -88,22 +89,21 @@ gsutil mb -c standard -l europe-west2 gs://$BUCKET_NAME/
 ```
 
 ### Dataflow Pipeline
-- A streaming pipeline using PubSub_Subscription_to_BigQuery template is created using gcloud CLI. 
-- A transform UDF javascript function is used to flatten "Data" object in the json message.
+- A streaming pipeline using PubSub_Subscription_to_BigQuery template is created using gcloud CLI.
 ```
 gcloud dataflow jobs run digital-appt-job-1 \
 --gcs-location gs://dataflow-templates/latest/PubSub_Subscription_to_BigQuery \
 --region=europe-west1 \
 --staging-location=gs://digital_health_uk_poc/stage \
---parameters inputSubscription=projects/digital-health-uk-poc/subscriptions/digital_subs,outputTableSpec=digital-health-uk-poc:digital.appointment,javascriptTextTransformGcsPath=gs://digital_health_uk_poc/flattenData.js,javascriptTextTransformFunctionName=transform
+--parameters inputSubscription=projects/digital-health-uk-poc/subscriptions/digital_subs,outputTableSpec=digital-health-uk-poc:digital_health.appointment
 ```
 ## Analytics
 - A view of the current state of an appointment must be shown (Is it currently booked / cancelled or completed) 
 ```
 SELECT AppointmentId, Type as CurrentStatus
-FROM (
-SELECT AppointmentId, Type,
-       ROW_NUMBER() OVER (PARTITION BY AppointmentId ORDER BY TimestampUtc DESC) AS rnum
+FROM ( 
+SELECT Data.AppointmentId, Type,
+       ROW_NUMBER() OVER (PARTITION BY Data.AppointmentId ORDER BY Data.TimestampUtc DESC) AS rnum
 FROM `digital-health-uk-poc.digital_health.appointment`)
 WHERE rnum = 1
 ```
@@ -126,10 +126,10 @@ FROM (
 SELECT AppointmentId, Type, 
        TIMESTAMP_DIFF(completed_time, booked_time, SECOND) AS delta_in_seconds
 FROM (       
-SELECT AppointmentId, Type,  
-       LAST_VALUE(TimestampUtc) OVER (PARTITION BY AppointmentId ORDER BY TimestampUtc ASC
+SELECT Data.AppointmentId, Type,  
+       LAST_VALUE(Data.TimestampUtc) OVER (PARTITION BY Data.AppointmentId ORDER BY Data.TimestampUtc ASC
        ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS completed_time,
-       FIRST_VALUE(TimestampUtc) OVER (PARTITION BY AppointmentId ORDER BY TimestampUtc ASC
+       FIRST_VALUE(Data.TimestampUtc) OVER (PARTITION BY Data.AppointmentId ORDER BY Data.TimestampUtc ASC
        ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS booked_time
 FROM `digital-health-uk-poc.digital_health.appointment` 
 WHERE Type IN ('AppointmentBooked','AppointmentComplete'))
@@ -146,13 +146,13 @@ FROM (
 SELECT AppointmentId, Type, Discipline,
        TIMESTAMP_DIFF(completed_time, booked_time, SECOND) AS delta_in_seconds
 FROM ( 
-SELECT AppointmentId, Type, IFNULL(Discipline,'NA') as Discipline,
-       LAST_VALUE(TimestampUtc) OVER (PARTITION BY AppointmentId ORDER BY TimestampUtc ASC
+SELECT Data.AppointmentId, Type, IFNULL(Discipline,'NA') as Discipline,
+       LAST_VALUE(Data.TimestampUtc) OVER (PARTITION BY Data.AppointmentId ORDER BY Data.TimestampUtc ASC
        ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS completed_time,
-       FIRST_VALUE(TimestampUtc) OVER (PARTITION BY AppointmentId ORDER BY TimestampUtc ASC
+       FIRST_VALUE(Data.TimestampUtc) OVER (PARTITION BY Data.AppointmentId ORDER BY Data.TimestampUtc ASC
        ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS booked_time
-FROM `macro-mender-236621.digital_health.appointment` as appointment
-LEFT JOIN UNNEST(appointment.Discipline) AS Discipline
+FROM `digital-health-uk-poc.digital_health.appointment` as appointment
+LEFT JOIN UNNEST(appointment.Data.Discipline) AS Discipline
 WHERE Type IN ('AppointmentBooked','AppointmentComplete'))
 WHERE Type = 'AppointmentComplete')
 GROUP BY Discipline
@@ -166,8 +166,16 @@ NA - indicates when discipline information is Not Available.
 
 ## Schema Changes
 Adapt to changes in schema:
-- Schema changes can be handled by not flattening "Data" object in Dataflow UDF, but keeping two columns only in BigQuery Appointment table - Type and Data.
-- This means future schema changes doesn't affect the ingestion pipeline, but only the SQL view queries has to be modified.
+- Dataflow ingestion pipeline needs no change when the message schema changes, assuming changes only happen to the fields under Data object.
+- BigQuery Schema can be easily changed to add new columns under Data record and is natively supported.
+- Relaxing a column's mode from REQUIRED to NULLABLE is also natively supported.
+- Some of the BigQuery operations can automatically add new columns such as - when you use a load or query job to overwrite a table, or
+when you append data to a table using a load or query job. But this is not supported for streaming inserts. So the new columns has to be manually added beforehand. 
+- All other schema modifications are unsupported and require manual workarounds, including:
+  - Changing a column's name
+  - Changing a column's data type
+  - Changing a column's mode (aside from relaxing REQUIRED columns to NULLABLE)
+  - Deleting a column
 
 ## Reconciliation		
 How you verify that the end result is correct?
