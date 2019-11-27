@@ -66,8 +66,9 @@ bq mk --location=europe-west2 digital_health
 |Data.Discipline|	STRING|	REPEATED|	
 
 ```
-bq mk -t digital_health.appointment ./code/[digital_health_schema.json](https://raw.githubusercontent.com/sudsk/gcp-digital-healthcare/master/code/digital_health_schema.json)
+bq mk -t digital_health.appointment ./code/digital_health_schema.json
 ```
+For reference, the schema json file is [here](https://raw.githubusercontent.com/sudsk/gcp-digital-healthcare/master/code/digital_health_schema.json)
 
 - a dead letter table (digital_health.appointment_error_records) for error records is automatically created by Dataflow job, if not created manually before 
 
@@ -98,6 +99,7 @@ gcloud dataflow jobs run digital-appt-job-1 \
 --parameters inputSubscription=projects/digital-health-uk-poc/subscriptions/digital_subs,outputTableSpec=digital-health-uk-poc:digital_health.appointment
 ```
 ## Analytics
+The sample data used for running the queries is [here](https://raw.githubusercontent.com/sudsk/gcp-digital-healthcare/master/data/streaming-data.json)
 - A view of the current state of an appointment must be shown (Is it currently booked / cancelled or completed) 
 ```
 SELECT AppointmentId, Type as CurrentStatus
