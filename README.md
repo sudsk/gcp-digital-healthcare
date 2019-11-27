@@ -51,7 +51,7 @@ gcloud pubsub topics create digi_appointments_topic --message-storage-policy-all
 gcloud pubsub subscriptions create digi_appointments_bq_sub --topic=digi_appointments_topic --topic-project=digital-health-uk-poc --ack-deadline=10 
 ```
 #### Create BigQuery Schema
-A schema (dataset:digital_health) is created to store the data. 
+A schema (dataset:digital_health) is created to store the ingested data:
 - a table appointment to store the ingested data  
 
 |Field name	|Type	|Mode|
