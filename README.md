@@ -10,7 +10,7 @@
 - [Analytics](#analytics)
 - [Schema Changes](#schema-changes)
 - [Reconciliation](#reconciliation)		
-- [Error scenarios](#error-scenarios)	
+- [Error handling](#error-handling)	
 
 ## Introduction
 Digital healthcare raises hundreds of types of events from microservice based architecture such as from their Mobile Apps. In order to support real time operations as well as requirements for business intelligence, these events must support multiple use cases, but also be able to evolve over time as the microservices themselves to.
@@ -119,7 +119,7 @@ WHERE rnum = 1
 |8|	a7d86ca5-7541-4c86-a7ad-1bec2b070b3c|AppointmentComplete|
 
 
-- Average duration of appointments should easily be calculable (also by discipline if the information is available).
+- Average duration of appointments should easily be calculable 
 ```
 SELECT AVG(delta_in_seconds) as Avg_duration_of_appointments
 FROM (
@@ -135,18 +135,49 @@ FROM `digital-health-uk-poc.digital_health.appointment`
 WHERE Type IN ('AppointmentBooked','AppointmentComplete'))
 WHERE Type = 'AppointmentComplete')
 ```
-
 |Row	|Avg_duration_of_appointments|	
 |-----|----------------------------|
 |1|	420.0|
+
+- Average duration of appointments by discipline if the information is available 
+```
+SELECT Discipline, AVG(delta_in_seconds) as Avg_duration_of_appointments
+FROM (
+SELECT AppointmentId, Type, Discipline,
+       TIMESTAMP_DIFF(completed_time, booked_time, SECOND) AS delta_in_seconds
+FROM ( 
+SELECT AppointmentId, Type, IFNULL(Discipline,'NA') as Discipline,
+       LAST_VALUE(TimestampUtc) OVER (PARTITION BY AppointmentId ORDER BY TimestampUtc ASC
+       ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS completed_time,
+       FIRST_VALUE(TimestampUtc) OVER (PARTITION BY AppointmentId ORDER BY TimestampUtc ASC
+       ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS booked_time
+FROM `macro-mender-236621.digital_health.appointment` as appointment
+LEFT JOIN UNNEST(appointment.Discipline) AS Discipline
+WHERE Type IN ('AppointmentBooked','AppointmentComplete'))
+WHERE Type = 'AppointmentComplete')
+GROUP BY Discipline
+```
+|Row	|Discipline|Avg_duration_of_appointments|	
+|-----|----------|------------------|
+|1|	NA|420.0|
+|2|Physio|426.0|
+
+NA - indicates when discipline information is Not Available.
 
 ## Schema Changes
 - Schema changes can be handled by not flattening "Data" object in Dataflow UDF, but keeping two columns only in BigQuery Appointment table - Type and Data.
 - This means future schema changes doesn't affect the ingestion pipeline, but only the SQL view queries has to be modified.
 
 ## Reconciliation		
-- how you verify that the end result is correct
-## Error scenarios	
+- how you verify that the end result is correct?
+- Reconciling a streaming data pipeline is a challenge in itself. One possibility is to check cumulative rolling counts. 
+- Primarily by monitoring Stackdriver metrics for Topic and Subscription. Some of the important ones are:
+  - subscription/num_undelivered_messages - cumulative rolling count
+  - topic/published requests - cumulative rolling count
+- Check BigQuery for messages loaded in a rolling period as well as monitor dead letter table for failures.
+- Monitoring above will ensure that all messages added to PubSub topic are ingested by Dataflow and either successfully loaded or ends up in dead letter. 
+
+## Error handling	
 - what happens if you get a broken event like { "Type": "AppointmentBooked", "Data": { , and how would you handle it?
 - Messages can fail to reach the output table for all kind of reasons (e.g., mismatched schema, malformed json). These messages are written to the dead letter table (digital_health.appointment_error_records).
 - A sample error record in the dead letter table as below:
